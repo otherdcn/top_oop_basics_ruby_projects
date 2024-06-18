@@ -13,11 +13,12 @@ module TicTacToe
     end
 
     def play
-      winner = nil
-      points_marked = []
-      winning_points = nil
-      board.display_graphic_key
-      board.display_grid
+      winner = nil # winner of game
+      points_marked = [] # already marked points in grid
+      winning_points = nil # winning grid points for highlighting
+
+      board.display_graphic_key # display graphic to indicate whice keys to press
+      board.display_grid # display playing board grid
 
       (board.grid.flatten.size / 2.0).ceil.times do |round|
         puts "Round #{round+1}"
@@ -29,23 +30,24 @@ module TicTacToe
           until correct_input
             puts "#{player.name} please enter the letter that matches the point you wish to mark: "
             input = gets.chomp.strip.downcase
-            validity = check_input_validity(input,points_marked)
-            next unless validity
-            availability = check_input_availability(input,points_marked)
+            validity = check_input_validity(input,points_marked) # ensure valid input is received (A-I or a-i)
+            next unless validity # skip below if invalid input is received and try agin
+            availability = check_input_availability(input,points_marked) # ensure the point chosen is not already marked from earlier
 
             correct_input = true if validity && availability
           end
-          marked_point = mark_board(player,input)
-          check_if_three(player) => {set_completed:, winning_points:}
 
-          if set_completed
+          marked_point = mark_board(player,input)
+          check_if_three(player) => {set_completed:, winning_points:} # rightward assigment
+
+          if set_completed # has player completed 3-in-a-row
             winner = player.name
-            break
+            break # no need to allow other player to play
           end
 
-          board.display_grid(marked_point)
+          board.display_grid(marked_point) # display playing board grid with recent marked point
         end
-        break if winner
+        break if winner # no need to continue if winner has been found
       end
 
       announce_winner(winner,winning_points)
@@ -81,7 +83,8 @@ module TicTacToe
     end
 
     def mark_board(player,position)
-      point = nil
+      point = nil # grid point to be marked on board; for highlighting
+
       case position
       when "A","a"
         board.grid[0][0] = player.board_mark
@@ -144,7 +147,7 @@ module TicTacToe
     end
 
     def column_check(board_mark)
-      grid_flatten = board.grid.flatten
+      grid_flatten = board.grid.flatten # flatten grid to ease the checking of one columnar points at once
       set_completed = false
       winning_points = 0
 
@@ -161,7 +164,7 @@ module TicTacToe
     end
 
     def diagonal_check(board_mark)
-      grid_flatten = board.grid.flatten
+      grid_flatten = board.grid.flatten # flatten grid to ease the checking of one diagonal points at once
       set_completed = false
       winning_points = 0
 
