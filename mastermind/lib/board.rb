@@ -1,6 +1,5 @@
 class Board
-  attr_accessor :code
-  attr_writer :guess_grid, :feedback_grid
+  attr_accessor :code, :guess_grid, :feedback_grid
 
   def initialize(turns = 12, code_length = 5)
     @code = Array.new(code_length, nil)
@@ -29,10 +28,14 @@ class Board
       end
     end
   end
+
+  # Combined display for the breaker to see progress
+  # def display_combined_guess_and_feedback_grid
+  # end
 end
 
-test_board = Board.new
+# test_board = Board.new
 
-test_board.display_guess_grid
+# test_board.display_guess_grid
 
-test_board.display_feedback_grid
+# test_board.display_feedback_grid
