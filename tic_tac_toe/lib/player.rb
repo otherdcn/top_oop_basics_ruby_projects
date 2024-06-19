@@ -6,5 +6,4 @@ class Player
     @board_mark = board_mark
     @score = 0
   end
-
 end
