@@ -19,6 +19,16 @@ module MasterMind
       end
     end
 
+    def set_maker_and_breaker(round)
+      if round.even?
+        @code_maker = player_one
+        @code_breaker = player_two
+      else
+        @code_maker = player_two
+        @code_breaker = player_one
+      end
+    end
+
     def make_code
       puts "make code"
     end
@@ -34,12 +44,20 @@ module MasterMind
     def play
       make_code
       board.display_guess_grid
+      rounds = 2
 
-      puts "Turns: #{board.guess_grid.size}"
-      board.guess_grid.size.times do |turn|
-        puts "Turn #{turn + 1}"
-        break_code
-        provide_feedback
+      rounds.times do |round|
+        set_maker_and_breaker(round)
+        puts "===> Round: #{round + 1} "
+        puts "===> Code maker: #{@code_maker.name}"
+        puts "===> Code breaker: #{@code_breaker.name}"
+
+        # board.guess_grid.size.times do |turn|
+        3.times do |turn|
+          puts "Turn #{turn + 1}"
+          break_code
+          provide_feedback
+        end
       end
     end
   end
@@ -47,10 +65,6 @@ end
 
 round_one = MasterMind::Game.new
 # puts "Player one: #{round_one.player_one.name}"
-# puts "Player two: #{round_one.player_two.name}"
-
-round_two = MasterMind::Game.new("DCN", "Al")
-# puts "Player one: #{round_two.player_one.name}"
-# puts "Player two: #{round_two.player_two.name}"
+# puts "Player two: #{round_one.player_two.name}"s
 
 round_one.play
