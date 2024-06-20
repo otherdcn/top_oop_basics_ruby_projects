@@ -32,28 +32,29 @@ module MasterMind
         match = false
 
         make_code
-        # board.guess_grid.size.times do |turn|
-        3.times do |turn|
+        board.guess_grid.size.times do |turn|
+          puts "******************** Turn #{turn + 1} ********************".black.on_white
           board.display_guess_grid
-          puts "Turn #{turn + 1}"
-          break_code(turn)
-          board.display_guess_grid
-          match = provide_feedback(turn)
           board.display_feedback_grid
+          break_code(turn)
+          match = provide_feedback(turn)
           next unless match
 
-          end_round(match)
+          end_round(match, turn)
           break
         end
-        end_round unless match
+        end_round(false, board.guess_grid.size) unless match
         break if continue_to_next_round == "n"
       end
     end
 
     private
 
-    def end_round(match = false)
+    def end_round(match = false, turn = 0)
+      board.display_guess_grid
+      board.display_feedback_grid
       puts "Code: #{board.code}"
+      puts "Break: #{board.guess_grid[turn]}"
       if match
         puts "#{code_breaker.name} has broken the code!".colorize(:green)
       else
@@ -81,20 +82,9 @@ module MasterMind
     def make_code
       if code_maker.instance_of?(Human)
         puts "#{code_maker.name}, make the code: "
-        display_colour_code_array_key
-        puts "Your code should contain 5 of the above colours, in any order, and repeat as many colours as you want."
 
-        input_validity = false
-        until input_validity
-          puts "Select the numbers that matches the colours you want, seperated by a comma"
-          puts "To avoid raising an error; select numbers 1-8, and ensure to seperate with a comma"
-          puts "e.g. 2,4,1,3,2"
-          input_array = gets.chomp.strip.split(",") # split into array then convert to integers
-          input_validity = validate_code_input(input_array)
-        end
+        input_array = prompt_user_input
 
-        input_array.map!(&:to_i)
-        input_array.map! { |ele| ele - 1 } # subtract 1 to idx for element to macth array indexing
         input_array.each_with_index do |element, idx|
           board.code[idx] = colour_code_array[element.to_i]
         end
@@ -105,7 +95,17 @@ module MasterMind
         end
       end
 
-      puts "Code has been set! Time to break it! #{board.code}"
+      puts "Code has been made. Time to break it!"
+    end
+
+    def break_code(turn)
+      puts "#{code_breaker.name}, break the code: "
+
+      input_array = prompt_user_input
+
+      input_array.each_with_index do |element, idx|
+        board.guess_grid[turn][idx] = colour_code_array[element.to_i]
+      end
     end
 
     def validate_code_input(input_array)
@@ -127,15 +127,14 @@ module MasterMind
       end
     end
 
-    def break_code(turn)
-      puts "#{code_breaker.name}, break the code: "
+    def prompt_user_input
       display_colour_code_array_key
-      puts "Your code should contain 5 of the above colours, in any order, and repeat as many colours as you want."
+      puts "Enter the digit that matches the colours you want, seperated by a comma, repeat as many colours as you want."
 
       input_validity = false
+
       until input_validity
-        puts "Select the numbers that matches the colours you want, seperated by a comma"
-        puts "To avoid raising an error; select numbers 1-8, and ensure to seperate with a comma"
+        # puts "To avoid raising an error; select numbers 1-8, and ensure to seperate with a comma"
         puts "e.g. 2,4,1,3,2"
         input_array = gets.chomp.strip.split(",") # split into array then convert to integers
         input_validity = validate_code_input(input_array)
@@ -143,20 +142,12 @@ module MasterMind
 
       input_array.map!(&:to_i)
       input_array.map! { |ele| ele - 1 } # subtract 1 to idx for element to macth array indexing
-      # guess_gird_array = board.guess_grid[turn]
-      input_array.each_with_index do |element, idx|
-        board.guess_grid[turn][idx] = colour_code_array[element.to_i]
-      end
 
-      puts "Guess Grid row #{turn + 1}: #{board.guess_grid[turn]}"
+      input_array
     end
 
     def provide_feedback(turn)
       puts "#{code_maker.name}, provide feedback: "
-      puts "Feedback key: "
-      puts "0 (colour not present)"
-      puts "1 (colour present, wrong position)"
-      puts "2 (colour present, right position)"
 
       if board.code == board.guess_grid[turn]
         code_broken = false

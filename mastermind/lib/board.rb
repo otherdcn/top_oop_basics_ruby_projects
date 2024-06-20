@@ -19,6 +19,11 @@ class Board
   end
 
   def display_feedback_grid
+    puts "Feedback key: "
+    puts "0 (colour not present)"
+    puts "1 (colour present, wrong position)"
+    puts "2 (colour present, right position)"
+
     puts "Feedback Grid"
     feedback_grid.each_with_index do |row_data, row_idx|
       print "#{row_idx + 1}     "
