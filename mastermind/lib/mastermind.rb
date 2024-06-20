@@ -61,23 +61,30 @@ module MasterMind
     end
 
     def make_code
-      puts "#{code_maker.name}, please set a code: "
-      display_colour_code_array_key
-      puts "Your code should contain 5 of the above colours, in any order, and repeat as many colours as you want."
+      if code_maker.instance_of?(Human)
+        puts "#{code_maker.name}, please set a code: "
+        display_colour_code_array_key
+        puts "Your code should contain 5 of the above colours, in any order, and repeat as many colours as you want."
 
-      input_validity = false
-      until input_validity
-        puts "Select the numbers that matches the colours you want, seperated by a comma"
-        puts "To avoid raising an error; select numbers 1-8, and ensure to seperate with a comma"
-        puts "e.g. 2,4,1,3,2"
-        input_array = gets.chomp.strip.split(",") # split into array then convert to integers
-        input_validity = validate_code_input(input_array)
-      end
+        input_validity = false
+        until input_validity
+          puts "Select the numbers that matches the colours you want, seperated by a comma"
+          puts "To avoid raising an error; select numbers 1-8, and ensure to seperate with a comma"
+          puts "e.g. 2,4,1,3,2"
+          input_array = gets.chomp.strip.split(",") # split into array then convert to integers
+          input_validity = validate_code_input(input_array)
+        end
 
-      input_array.map!(&:to_i)
-      input_array.map! { |ele| ele - 1 } # subtract 1 to idx for element to macth array indexing
-      input_array.each_with_index do |element, idx|
-        board.code[idx] = colour_code_array[element.to_i]
+        input_array.map!(&:to_i)
+        input_array.map! { |ele| ele - 1 } # subtract 1 to idx for element to macth array indexing
+        input_array.each_with_index do |element, idx|
+          board.code[idx] = colour_code_array[element.to_i]
+        end
+      else
+        puts "#{code_maker.name}, will set a code"
+        board.code.each_with_index do |ele, idx|
+          board.code[idx] = colour_code_array[rand(7)]
+        end
       end
 
       p board.code
