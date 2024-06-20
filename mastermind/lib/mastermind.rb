@@ -1,5 +1,6 @@
 require_relative "board"
 require_relative "player"
+require "colorize"
 
 module MasterMind
   class Game
@@ -28,6 +29,7 @@ module MasterMind
         puts "===> Round: #{round + 1} "
         puts "===> Code maker: #{@code_maker.name}"
         puts "===> Code breaker: #{@code_breaker.name}"
+        match = false
 
         make_code
         # board.guess_grid.size.times do |turn|
@@ -35,13 +37,29 @@ module MasterMind
           board.display_guess_grid
           puts "Turn #{turn + 1}"
           break_code(turn)
-          provide_feedback
+          board.display_guess_grid
+          match = provide_feedback(turn)
+          board.display_feedback_grid
+          next unless match
+
+          end_round(match)
+          break
         end
+        end_round unless match
         break if continue_to_next_round == "n"
       end
     end
 
     private
+
+    def end_round(match = false)
+      puts "Code: #{board.code}"
+      if match
+        puts "#{code_breaker.name} has broken the code!".colorize(:green)
+      else
+        puts "#{code_breaker.name} failed to break the code!".colorize(:red)
+      end
+    end
 
     def display_colour_code_array_key
       puts "Colour code options:"
@@ -62,7 +80,7 @@ module MasterMind
 
     def make_code
       if code_maker.instance_of?(Human)
-        puts "#{code_maker.name}, make a code: "
+        puts "#{code_maker.name}, make the code: "
         display_colour_code_array_key
         puts "Your code should contain 5 of the above colours, in any order, and repeat as many colours as you want."
 
@@ -87,7 +105,7 @@ module MasterMind
         end
       end
 
-      p board.code
+      puts "Code has been set! Time to break it! #{board.code}"
     end
 
     def validate_code_input(input_array)
@@ -110,7 +128,7 @@ module MasterMind
     end
 
     def break_code(turn)
-      puts "#{code_breaker.name}, break the code..."
+      puts "#{code_breaker.name}, break the code: "
       display_colour_code_array_key
       puts "Your code should contain 5 of the above colours, in any order, and repeat as many colours as you want."
 
@@ -133,8 +151,30 @@ module MasterMind
       puts "Guess Grid row #{turn + 1}: #{board.guess_grid[turn]}"
     end
 
-    def provide_feedback
-      puts "provide feedback"
+    def provide_feedback(turn)
+      puts "#{code_maker.name}, provide feedback: "
+      puts "Feedback key: "
+      puts "0 (colour not present)"
+      puts "1 (colour present, wrong position)"
+      puts "2 (colour present, right position)"
+
+      if board.code == board.guess_grid[turn]
+        code_broken = false
+        board.feedback_grid[turn].each_index { |idx| board.feedback_grid[turn][idx] = "2" }
+        return code_broken = true
+      end
+
+      board.guess_grid[turn].each_with_index do |peg, idx|
+        board.feedback_grid[turn][idx] = if board.code[idx] == board.guess_grid[turn][idx]
+                                           "2"
+                                         elsif board.code.include?(peg)
+                                           "1"
+                                         else
+                                           "0"
+                                         end
+        code_broken = true if board.feedback_grid[turn].all?(2)
+      end
+      code_broken
     end
 
     def continue_to_next_round
