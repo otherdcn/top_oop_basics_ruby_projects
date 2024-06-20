@@ -2,7 +2,7 @@ class Board
   attr_accessor :code, :guess_grid, :feedback_grid
 
   def initialize(turns = 12, code_length = 5)
-    @code = Array.new(code_length, nil)
+    @code = Array.new(code_length)
     @guess_grid = Array.new(turns) { Array.new(code_length, ".") }
     @feedback_grid = Array.new(turns) { Array.new(code_length, ".") }
   end
