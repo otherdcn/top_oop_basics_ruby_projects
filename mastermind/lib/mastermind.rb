@@ -25,6 +25,7 @@ module MasterMind
       rounds = 2
 
       rounds.times do |round|
+        puts "\n******************** Round #{round + 1} ********************".black.on_white
         set_maker_and_breaker(round)
         puts "===> Round: #{round + 1} "
         puts "===> Code maker: #{@code_maker.name}"
@@ -32,8 +33,9 @@ module MasterMind
         match = false
 
         make_code
+
         board.guess_grid.size.times do |turn|
-          puts "******************** Turn #{turn + 1} ********************".black.on_white
+          puts "\n******************** Turn #{turn + 1} ********************".black.on_white
           board.display_guess_grid
           board.display_feedback_grid
           break_code(turn)
@@ -81,7 +83,7 @@ module MasterMind
 
     def make_code
       if code_maker.instance_of?(Human)
-        puts "#{code_maker.name}, make the code: "
+        puts "#{code_maker.name}, make the code:"
 
         input_array = prompt_user_input
 
@@ -89,7 +91,7 @@ module MasterMind
           board.code[idx] = colour_code_array[element.to_i]
         end
       else
-        puts "#{code_maker.name}, will set a code"
+        puts "#{code_maker.name}, will set a code..."
         board.code.each_index do |idx|
           board.code[idx] = colour_code_array[rand(7)]
         end
@@ -99,31 +101,16 @@ module MasterMind
     end
 
     def break_code(turn)
-      puts "#{code_breaker.name}, break the code: "
+      if code_breaker.instance_of(Human)
+        puts "#{code_breaker.name}, break the code:"
 
-      input_array = prompt_user_input
+        input_array = prompt_user_input
 
-      input_array.each_with_index do |element, idx|
-        board.guess_grid[turn][idx] = colour_code_array[element.to_i]
-      end
-    end
-
-    def validate_code_input(input_array)
-      elements_not_integers = input_array.select { |ele| ele.to_i.zero? }
-      elements_out_of_range = input_array.reject { |ele| ele.to_i.between?(1, 8) }
-      array_too_small = input_array.size < 5
-      array_too_big = input_array.size > 5
-
-      if array_too_small
-        puts "Not enough colours chosen: size = #{input_array.size}"
-      elsif array_too_big
-        puts "Too many colours chosen: size = #{input_array.size}"
-      elsif !elements_not_integers.empty? # check if all elements are integers
-        puts "Some or all are not integers: #{elements_not_integers}"
-      elsif !elements_out_of_range.empty?
-        puts "Some or all are out of range: #{elements_out_of_range}"
+        input_array.each_with_index do |element, idx|
+          board.guess_grid[turn][idx] = colour_code_array[element.to_i]
+        end
       else
-        true
+        puts "#{code_breaker.name}, will try to break the code..."
       end
     end
 
@@ -146,8 +133,27 @@ module MasterMind
       input_array
     end
 
+    def validate_code_input(input_array)
+      elements_not_integers = input_array.select { |ele| ele.to_i.zero? }
+      elements_out_of_range = input_array.reject { |ele| ele.to_i.between?(1, 8) }
+      array_too_small = input_array.size < 5
+      array_too_big = input_array.size > 5
+
+      if array_too_small
+        puts "Not enough colours chosen: size = #{input_array.size}"
+      elsif array_too_big
+        puts "Too many colours chosen: size = #{input_array.size}"
+      elsif !elements_not_integers.empty? # check if all elements are integers
+        puts "Some or all are not integers: #{elements_not_integers}"
+      elsif !elements_out_of_range.empty?
+        puts "Some or all are out of range: #{elements_out_of_range}"
+      else
+        true
+      end
+    end
+
     def provide_feedback(turn)
-      puts "#{code_maker.name}, provide feedback: "
+      puts "Feedback Generated..."
 
       if board.code == board.guess_grid[turn]
         code_broken = false

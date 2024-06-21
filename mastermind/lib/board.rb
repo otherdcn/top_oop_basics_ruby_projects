@@ -1,3 +1,5 @@
+require "colorize"
+
 class Board
   attr_accessor :code, :guess_grid, :feedback_grid
 
@@ -8,7 +10,7 @@ class Board
   end
 
   def display_guess_grid
-    puts "Code-breaker Grid"
+    puts "Code-breaker Grid".underline
     guess_grid.each_with_index do |row_data, row_idx|
       print "#{row_idx + 1}     "
       row_data.each_with_index do |column_data, column_idx|
@@ -19,12 +21,12 @@ class Board
   end
 
   def display_feedback_grid
-    puts "Feedback key: "
+    puts "Feedback key:".underline
     puts "0 (colour not present)"
     puts "1 (colour present, wrong position)"
     puts "2 (colour present, right position)"
 
-    puts "Feedback Grid"
+    puts "Feedback Grid".underline
     feedback_grid.each_with_index do |row_data, row_idx|
       print "#{row_idx + 1}     "
       row_data.each_with_index do |column_data, column_idx|
