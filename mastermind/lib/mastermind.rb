@@ -4,10 +4,10 @@ require "colorize"
 
 module MasterMind
   class Game
-    attr_reader :board, :player_one, :player_two, :code_maker, :code_breaker, :colour_code_array
+    attr_reader :player_one, :player_two, :code_maker, :code_breaker, :colour_code_array, :computer_colour_code_array
+    attr_accessor :board, :computer_decoded_positions
 
     def initialize(player_one = "", player_two = "")
-      @board = Board.new
       @colour_code_array = %w[red green yellow blue magenta cyan white black]
 
       if player_one.empty? && player_two.empty?
@@ -30,6 +30,8 @@ module MasterMind
         puts "===> Round: #{round + 1} "
         puts "===> Code maker: #{@code_maker.name}"
         puts "===> Code breaker: #{@code_breaker.name}"
+        self.board = Board.new # Generate new board every new round
+        puts "===> Boards Set and ready to go!"
         match = false
 
         make_code
@@ -52,7 +54,7 @@ module MasterMind
 
     private
 
-    def end_round(match = false, turn = 0)
+    def end_round(match, turn)
       board.display_guess_grid
       board.display_feedback_grid
       puts "Code: #{board.code}"
@@ -72,13 +74,20 @@ module MasterMind
     end
 
     def set_maker_and_breaker(round)
-      if round.even?
+      if round.even? # switch between odd? and even?; to test computer as codemaker or codebreaker
         @code_maker = player_one
         @code_breaker = player_two
       else
         @code_maker = player_two
         @code_breaker = player_one
+        # Only if player is a computer, setup the properties/attributes needed to decode human code
+        setup_computer_codebreaking_properties if code_breaker.instance_of?(Computer)
       end
+    end
+
+    def setup_computer_codebreaking_properties
+      @computer_colour_code_array = colour_code_array
+      @computer_decoded_positions = Array.new(5)
     end
 
     def make_code
@@ -101,7 +110,7 @@ module MasterMind
     end
 
     def break_code(turn)
-      if code_breaker.instance_of(Human)
+      if code_breaker.instance_of?(Human)
         puts "#{code_breaker.name}, break the code:"
 
         input_array = prompt_user_input
@@ -111,6 +120,18 @@ module MasterMind
         end
       else
         puts "#{code_breaker.name}, will try to break the code..."
+
+        computer_check_feedback(turn - 1) unless turn.zero? # Check previous feedback before attemtping nex codebreak
+
+        computer_decoded_positions.each_with_index do |element, idx|
+          board.guess_grid[turn][idx] = if element.nil?
+                                          # if position hasn't been decoded, randomly select from colour array
+                                          computer_colour_code_array[rand(computer_colour_code_array.size - 1)]
+                                        else
+                                          # if position has been decoded, pass the element
+                                          element
+                                        end
+        end
       end
     end
 
@@ -121,7 +142,6 @@ module MasterMind
       input_validity = false
 
       until input_validity
-        # puts "To avoid raising an error; select numbers 1-8, and ensure to seperate with a comma"
         puts "e.g. 2,4,1,3,2"
         input_array = gets.chomp.strip.split(",") # split into array then convert to integers
         input_validity = validate_code_input(input_array)
@@ -163,11 +183,11 @@ module MasterMind
 
       board.guess_grid[turn].each_with_index do |peg, idx|
         board.feedback_grid[turn][idx] = if board.code[idx] == board.guess_grid[turn][idx]
-                                           "2"
+                                           2
                                          elsif board.code.include?(peg)
-                                           "1"
+                                           1
                                          else
-                                           "0"
+                                           0
                                          end
         code_broken = true if board.feedback_grid[turn].all?(2)
       end
@@ -184,6 +204,21 @@ module MasterMind
         puts "Exiting game..."
       end
       next_round
+    end
+
+    def computer_check_feedback(turn)
+      guess_code = board.guess_grid[turn]
+      feedback = board.feedback_grid[turn]
+
+      guess_code.each_with_index do |element, idx|
+        if feedback[idx].zero?
+          computer_colour_code_array.delete(element) # remove from choice of colours to ensure efficiency
+        elsif feedback[idx] == 2
+          computer_decoded_positions[idx] = element # remember correctly decoded colour and the position for future use
+        end
+      end
+
+      puts "Decode: #{computer_decoded_positions}"
     end
   end
 end
