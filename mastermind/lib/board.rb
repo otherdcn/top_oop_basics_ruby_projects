@@ -11,10 +11,18 @@ class Board
 
   def display_guess_grid
     puts "Code-breaker Grid".underline
-    guess_grid.each_with_index do |row_data, row_idx|
-      print "#{row_idx + 1}     "
+
+    formatted_guess_grid = guess_grid.map do |row|
+      row.map do |col|
+        col.ljust(8)
+      end
+    end
+
+    formatted_guess_grid.each_with_index do |row_data, row_idx|
+      row_idx += 1
+      print row_idx.to_s.ljust(4)
       row_data.each_with_index do |column_data, column_idx|
-        print "#{column_data}   "
+        print column_data
         puts "" if column_idx == 4
       end
     end
@@ -27,10 +35,18 @@ class Board
     puts "2 (colour present, right position)"
 
     puts "Feedback Grid".underline
-    feedback_grid.each_with_index do |row_data, row_idx|
-      print "#{row_idx + 1}     "
+
+    formatted_feedback_grid = feedback_grid.map do |row|
+      row.map do |col|
+        col.to_s.ljust(8)
+      end
+    end
+
+    formatted_feedback_grid.each_with_index do |row_data, row_idx|
+      row_idx += 1
+      print row_idx.to_s.ljust(4)
       row_data.each_with_index do |column_data, column_idx|
-        print "#{column_data}   "
+        print column_data
         puts "" if column_idx == 4
       end
     end

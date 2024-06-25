@@ -224,7 +224,5 @@ module MasterMind
 end
 
 round_one = MasterMind::Game.new
-# puts "Player one: #{round_one.player_one.name}"
-# puts "Player two: #{round_one.player_two.name}"s
 
 round_one.play
