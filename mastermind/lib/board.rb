@@ -13,9 +13,7 @@ class Board
     puts "Code-breaker Grid".underline
 
     formatted_guess_grid = guess_grid.map do |row|
-      row.map do |col|
-        col.ljust(8)
-      end
+      row.map { |col| col.to_s.ljust(8) }
     end
 
     formatted_guess_grid.each_with_index do |row_data, row_idx|
@@ -37,9 +35,7 @@ class Board
     puts "Feedback Grid".underline
 
     formatted_feedback_grid = feedback_grid.map do |row|
-      row.map do |col|
-        col.to_s.ljust(8)
-      end
+      row.map { |col| col.to_s.ljust(8) }
     end
 
     formatted_feedback_grid.each_with_index do |row_data, row_idx|
@@ -59,7 +55,7 @@ class Board
     end
 
     formatted_guess_grid = guess_grid.map do |row|
-      row.map { |col| col.ljust(8) }
+      row.map { |col| col.to_s.ljust(8) }
     end
 
     puts "0 (colour not present)"

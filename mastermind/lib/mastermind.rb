@@ -19,6 +19,7 @@ module MasterMind
     end
 
     def play(rounds = 2)
+      puts "#{rounds} rounds to play!"
       rounds.times do |round|
         puts "\n******************** Round #{round + 1} ********************".black.on_white
         set_maker_and_breaker(round)
@@ -41,9 +42,10 @@ module MasterMind
           end_round(match, turn)
           break
         end
-        end_round(false, board.guess_grid.size) unless match
-        break if continue_to_next_round == "n"
+        end_round(false, board.guess_grid.size - 1) unless match
       end
+
+      announce_winner
     end
 
     private
@@ -59,6 +61,17 @@ module MasterMind
         puts "Break: N/A"
         puts "#{code_breaker.name} failed to break the code!".colorize(:red)
       end
+
+      add_code_maker_score(turn)
+
+      puts "SCOREBOARD".center(45).underline
+      [player_one, player_two].each do |player|
+        print player.name.to_s.ljust(15)
+        puts "| #{player.score}"
+      end
+
+      print "Press any key to continue..."
+      gets
     end
 
     def display_colour_code_array_key
@@ -81,7 +94,7 @@ module MasterMind
     end
 
     def setup_computer_codebreaking_properties
-      @computer_colour_code_array = colour_code_array
+      @computer_colour_code_array = colour_code_array.dup # duplicate so that modifications don't affect original
       @computer_decoded_positions = Array.new(5)
     end
 
@@ -189,18 +202,6 @@ module MasterMind
       code_broken
     end
 
-    def continue_to_next_round
-      puts "\nPleay next round where roles are reversed? [Y/N]"
-      next_round = gets.chomp.strip
-
-      if next_round == "y"
-        puts "Continuing to next round..."
-      else
-        puts "Exiting game..."
-      end
-      next_round
-    end
-
     def computer_check_feedback(turn)
       guess_code = board.guess_grid[turn]
       feedback = board.feedback_grid[turn]
@@ -214,6 +215,19 @@ module MasterMind
       end
 
       puts "Decode: #{computer_decoded_positions}"
+    end
+
+    def add_code_maker_score(turn)
+      code_maker.score += (turn + 1)
+    end
+
+    def announce_winner
+      print "\nGame over: "
+      if player_one.score > player_two.score
+        puts "Congratulations #{player_one.name}".green
+      else
+        puts "Congratulations #{player_two.name}".green
+      end
     end
   end
 end

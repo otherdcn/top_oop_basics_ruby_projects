@@ -9,7 +9,7 @@ def validate_mode_input(input)
 end
 
 def validate_rounds_input(input)
-  if input.between?(1, 2)
+  if input.between?(1, 3)
     true
   else
     puts "Wrong input; please type 1 or 2; try again"
