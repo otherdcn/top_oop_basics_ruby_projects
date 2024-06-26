@@ -7,23 +7,18 @@ module MasterMind
     attr_reader :player_one, :player_two, :code_maker, :code_breaker, :colour_code_array, :computer_colour_code_array
     attr_accessor :board, :computer_decoded_positions
 
-    def initialize(player_one = "", player_two = "")
+    def initialize(mode = 2, player_one = "Joe", player_two = "Ted")
       @colour_code_array = %w[red green yellow blue magenta cyan white black]
+      @player_one = Human.new(player_one)
 
-      if player_one.empty? && player_two.empty?
-        @player_one = Computer.new
-        @player_two = Human.new
-        puts "Default players created..."
-      else
-        @player_one = Computer.new(player_one)
-        @player_two = Human.new(player_two)
-        puts "Custom players created..."
-      end
+      @player_two = if mode == 1
+                      Human.new(player_two)
+                    else
+                      Computer.new
+                    end
     end
 
-    def play
-      rounds = 2
-
+    def play(rounds = 2)
       rounds.times do |round|
         puts "\n******************** Round #{round + 1} ********************".black.on_white
         set_maker_and_breaker(round)
@@ -75,11 +70,11 @@ module MasterMind
 
     def set_maker_and_breaker(round)
       if round.even? # switch between odd? and even?; to test computer as codemaker or codebreaker
-        @code_maker = player_one
-        @code_breaker = player_two
-      else
         @code_maker = player_two
         @code_breaker = player_one
+      else
+        @code_maker = player_one
+        @code_breaker = player_two
         # Only if player is a computer, setup the properties/attributes needed to decode human code
         setup_computer_codebreaking_properties if code_breaker.instance_of?(Computer)
       end
@@ -223,6 +218,6 @@ module MasterMind
   end
 end
 
-round_one = MasterMind::Game.new
+# round_one = MasterMind::Game.new
 
-round_one.play
+# round_one.play
