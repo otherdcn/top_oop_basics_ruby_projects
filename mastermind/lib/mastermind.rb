@@ -38,8 +38,7 @@ module MasterMind
 
         board.guess_grid.size.times do |turn|
           puts "\n******************** Turn #{turn + 1} ********************".black.on_white
-          board.display_guess_grid
-          board.display_feedback_grid
+          board.display_combined_guess_and_feedback_grid
           break_code(turn)
           match = provide_feedback(turn)
           next unless match
@@ -55,19 +54,20 @@ module MasterMind
     private
 
     def end_round(match, turn)
-      board.display_guess_grid
-      board.display_feedback_grid
-      puts "Code: #{board.code}"
-      puts "Break: #{board.guess_grid[turn]}"
+      board.display_combined_guess_and_feedback_grid
+      puts "\nCode: #{board.code}"
+
       if match
+        puts "Break: #{board.guess_grid[turn]}"
         puts "#{code_breaker.name} has broken the code!".colorize(:green)
       else
+        puts "Break: N/A"
         puts "#{code_breaker.name} failed to break the code!".colorize(:red)
       end
     end
 
     def display_colour_code_array_key
-      puts "Colour code options:"
+      puts "\nColour code options:"
       colour_code_array.each_with_index do |colour, idx|
         puts "#{idx + 1}. #{colour}" # add 1 to idx for display list to start from 1 instead of 0
       end
@@ -92,7 +92,7 @@ module MasterMind
 
     def make_code
       if code_maker.instance_of?(Human)
-        puts "#{code_maker.name}, make the code:"
+        puts "\n#{code_maker.name}, make the code:"
 
         input_array = prompt_user_input
 
@@ -102,7 +102,7 @@ module MasterMind
       else
         puts "#{code_maker.name}, will set a code..."
         board.code.each_index do |idx|
-          board.code[idx] = colour_code_array[rand(7)]
+          board.code[idx] = colour_code_array[rand(8)]
         end
       end
 
@@ -111,7 +111,7 @@ module MasterMind
 
     def break_code(turn)
       if code_breaker.instance_of?(Human)
-        puts "#{code_breaker.name}, break the code:"
+        puts "\n#{code_breaker.name}, break the code:"
 
         input_array = prompt_user_input
 
@@ -119,14 +119,14 @@ module MasterMind
           board.guess_grid[turn][idx] = colour_code_array[element.to_i]
         end
       else
-        puts "#{code_breaker.name}, will try to break the code..."
+        puts "\n#{code_breaker.name}, will try to break the code..."
 
         computer_check_feedback(turn - 1) unless turn.zero? # Check previous feedback before attemtping nex codebreak
 
         computer_decoded_positions.each_with_index do |element, idx|
           board.guess_grid[turn][idx] = if element.nil?
                                           # if position hasn't been decoded, randomly select from colour array
-                                          computer_colour_code_array[rand(computer_colour_code_array.size - 1)]
+                                          computer_colour_code_array[rand(computer_colour_code_array.size)]
                                         else
                                           # if position has been decoded, pass the element
                                           element
@@ -195,7 +195,7 @@ module MasterMind
     end
 
     def continue_to_next_round
-      puts "Pleay next round where roles are reversed? [Y/N]"
+      puts "\nPleay next round where roles are reversed? [Y/N]"
       next_round = gets.chomp.strip
 
       if next_round == "y"
