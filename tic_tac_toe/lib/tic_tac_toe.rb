@@ -4,7 +4,8 @@ require "colorize"
 
 module TicTacToe
   class Game
-    attr_reader :board, :player_x, :player_o
+    attr_reader :player_x, :player_o
+    attr_accessor :board, :round_winner
 
     def initialize
       @board = Board.new
@@ -12,49 +13,57 @@ module TicTacToe
       @player_o = Player.new("Player O", "O")
     end
 
-    def play
-      winner = nil # winner of game
-      points_marked = [] # already marked points in grid
-      winning_points = nil # winning grid points for highlighting
+    def play(rounds = 1)
+      puts "Best of #{rounds}" unless rounds == 1
 
-      board.display_graphic_key # display graphic to indicate whice keys to press
-      board.display_grid # display playing board grid
+      rounds.times do |round|
+        puts "\n******************** Round #{round + 1} ********************".black.on_white
 
-      (board.grid.flatten.size / 2.0).ceil.times do |round|
-        puts "Round #{round + 1}"
+        self.round_winner = nil # winner of round
+        self.board = Board.new
+        points_marked = [] # already marked points in grid
+        winning_points = nil # winning grid points for highlighting
 
-        [player_x, player_o].each do |player|
-          break if points_marked.size == 9
+        board.display_graphic_key # display graphic to indicate whice keys to press
+        board.display_grid # display playing board grid
 
-          correct_input = false
+        (board.grid.flatten.size / 2.0).ceil.times do |turn|
+          puts "Turn #{turn + 1}"
 
-          until correct_input # sanitise and validate input
-            puts "#{player.name} please enter the letter that matches the point you wish to mark: "
-            input = gets.chomp.strip.downcase
-            validity = check_input_validity(input) # ensure input is valid
-            next unless validity # skip below if invalid input is received and try agin
+          [player_x, player_o].each do |player|
+            break if points_marked.size == 9
 
-            availability = check_input_availability(input, points_marked) # ensure input is not already marked
+            correct_input = false
 
-            correct_input = true if validity && availability
+            until correct_input # sanitise and validate input
+              print "#{player.name} please enter the letter that matches the point you wish to mark: "
+              input = gets.chomp.strip.downcase
+              validity = check_input_validity(input) # ensure input is valid
+              next unless validity # skip below if invalid input is received and try agin
+
+              availability = check_input_availability(input, points_marked) # ensure input is not already marked
+
+              correct_input = true if validity && availability
+            end
+
+            marked_point = mark_board(player, input)
+            set_check = check_if_three(player)
+            set_completed = set_check[:set_completed]
+            winning_points = set_check[:winning_points]
+
+            if set_completed # has player completed 3-in-a-row
+              self.round_winner = player
+              break # no need to allow other player to play
+            end
+
+            board.display_grid(marked_point) # display playing board grid with recent marked point
           end
-
-          marked_point = mark_board(player, input)
-          set_check = check_if_three(player)
-          set_completed = set_check[:set_completed]
-          winning_points = set_check[:winning_points]
-
-          if set_completed # has player completed 3-in-a-row
-            winner = player.name
-            break # no need to allow other player to play
-          end
-
-          board.display_grid(marked_point) # display playing board grid with recent marked point
+          break if self.round_winner # no need to continue if winner has been found
         end
-        break if winner # no need to continue if winner has been found
+        announce_round_winner(winning_points,round+1) # announce winner of the round and tally the score
       end
 
-      announce_winner(winner, winning_points)
+      display_scoreboard(rounds)
     end
 
     private
@@ -132,7 +141,7 @@ module TicTacToe
       elsif diagonal_check(player.board_mark)[:set_completed]
         diagonal_check(player.board_mark)
       else
-        { set_completed: false, winning_points: 0 }
+        { set_completed: false, winning_points: [] }
       end
     end
 
@@ -185,18 +194,43 @@ module TicTacToe
       { set_completed: set_completed, winning_points: winning_points }
     end
 
-    def announce_winner(winner, winning_points)
+    def announce_round_winner(winning_points,round)
       puts "*** Final board ***"
       board.display_grid(nil, winning_points)
       puts "*** Final board ***"
 
-      winner ||= "Draw"
-
-      if winner == "Draw"
+      if round_winner.nil?
         puts "DRAW!".colorize(:yellow)
       else
-        puts "CONGRATULATIONS: #{winner} WINS!".colorize(:green)
+        round_winner.score += 1
+        puts "Round #{round} goes to #{round_winner.name}!".colorize(:green)
       end
+
+      print "Press any key to continue..."
+      gets
+    end
+
+    def display_scoreboard(rounds)
+      draw_score = (rounds - (player_x.score + player_o.score))
+
+      puts "SCOREBOARD".center(45).underline
+      [player_x, player_o].each do |player|
+        print player.name.to_s.ljust(15)
+        puts "| #{player.score}"
+      end
+      print "Draw".ljust(15)
+      puts "| #{draw_score}"
+
+      if player_x.score > player_o.score
+        puts "#{player_x.name} wins Best of #{rounds}!".colorize(:green)
+      elsif player_x.score < player_o.score
+        puts "#{player_o.name} wins Best of #{rounds}!".colorize(:green)
+      else
+        puts "Level! :-(".colorize(:red)
+      end
+
+      print "Press any key to continue..."
+      gets
     end
   end
 end
