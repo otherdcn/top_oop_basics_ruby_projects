@@ -16,7 +16,19 @@ def validate_rounds_input(input)
   end
 end
 
-puts "Would you like to play:"
+puts %q{
+Welcome to Mastermind.
+
+There is a code-maker and code-breaker. The code-maker sets a colour
+code and the code-breaker tries to break it by guessing within a certain
+number of turns. Each turn the code-breaker will get some feedback about
+how good the guess was; whether it was exactly correct or just the correct
+colour but in the wrong position.
+
+Time to break!
+}
+
+puts "\nWould you like to play:"
 puts "1. Human vs Human"
 puts "2. Human vs Computer"
 
@@ -28,23 +40,24 @@ until input_validity
 end
 
 if game_mode_input == 1
-  puts "Human vs Human"
-  print "Player 1 name: "
+  puts "\nSelected Human vs Human"
+  print "Enter Player 1 name: "
   player_one_name = gets.chomp.strip
 
-  print "Player 2 name: "
+  print "Enter Player 2 name: "
   player_two_name = gets.chomp.strip
 
   game = MasterMind::Game.new(game_mode_input, player_one_name, player_two_name)
 else
-  puts "Human vs Computer"
-  print "Player 1 name: "
+  puts "\nSelected Human vs Computer"
+  print "Enter Human player name: "
   player_one_name = gets.chomp.strip
 
   game = MasterMind::Game.new(game_mode_input, player_one_name)
 end
 
-puts "How many rounds of game:"
+print "\nHi #{player_one_name}, "
+puts "how many rounds of game:"
 puts "1. 2"
 puts "2. 4"
 puts "3. 6"

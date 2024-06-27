@@ -19,7 +19,9 @@ module MasterMind
     end
 
     def play(rounds = 2)
-      puts "#{rounds} rounds to play!"
+      puts "\n#{rounds} rounds to play!"
+      puts "#{player_one.name} vs #{player_two.name}"
+
       rounds.times do |round|
         puts "\n******************** Round #{round + 1} ********************".black.on_white
         set_maker_and_breaker(round)
