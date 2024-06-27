@@ -24,8 +24,7 @@ module TicTacToe
         points_marked = [] # already marked points in grid
         winning_points = nil # winning grid points for highlighting
 
-        board.display_graphic_key # display graphic to indicate whice keys to press
-        board.display_grid # display playing board grid
+        board.combined_grids # display a combined playing board grid and graphic key, side-by-side
 
         (board.grid.flatten.size / 2.0).ceil.times do |turn|
           puts "\nTurn #{turn + 1}"
@@ -45,7 +44,7 @@ module TicTacToe
               break # no need to allow other player to play
             end
 
-            board.display_grid(marked_point) # display playing board grid with recent marked point
+            board.combined_grids(marked_point) # display playing board grid with recent marked point
           end
           break if self.round_winner # no need to continue if winner has been found
         end
@@ -202,7 +201,7 @@ module TicTacToe
 
     def announce_round_winner(winning_points,round)
       puts "\n*** Final board ***"
-      board.display_grid(nil, winning_points)
+      board.combined_grids(nil, winning_points)
       puts "*** Final board ***"
 
       if round_winner.nil?
