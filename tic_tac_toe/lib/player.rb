@@ -1,5 +1,6 @@
 class Player
-  attr_reader :name, :board_mark, :score
+  attr_reader :name, :board_mark
+  attr_accessor :score
 
   def initialize(name, board_mark)
     @name = name
