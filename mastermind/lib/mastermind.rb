@@ -72,7 +72,7 @@ module MasterMind
         puts "| #{player.score}"
       end
 
-      print "Press any key to continue..."
+      print "\nPress any key to continue..."
       gets
     end
 

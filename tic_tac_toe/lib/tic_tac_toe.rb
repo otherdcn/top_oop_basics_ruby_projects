@@ -28,23 +28,12 @@ module TicTacToe
         board.display_grid # display playing board grid
 
         (board.grid.flatten.size / 2.0).ceil.times do |turn|
-          puts "Turn #{turn + 1}"
+          puts "\nTurn #{turn + 1}"
 
           [player_x, player_o].each do |player|
             break if points_marked.size == 9
 
-            correct_input = false
-
-            until correct_input # sanitise and validate input
-              print "#{player.name} please enter the letter that matches the point you wish to mark: "
-              input = gets.chomp.strip.downcase
-              validity = check_input_validity(input) # ensure input is valid
-              next unless validity # skip below if invalid input is received and try agin
-
-              availability = check_input_availability(input, points_marked) # ensure input is not already marked
-
-              correct_input = true if validity && availability
-            end
+            input = prompt_user_input(player, points_marked)
 
             marked_point = mark_board(player, input)
             set_check = check_if_three(player)
@@ -67,6 +56,23 @@ module TicTacToe
     end
 
     private
+
+    def prompt_user_input(player, points_marked)
+      correct_input = false
+
+      until correct_input # sanitise and validate input
+        print "#{player.name} please enter the letter that matches the point you wish to mark: "
+        input = gets.chomp.strip.downcase
+        validity = check_input_validity(input) # ensure input is valid
+        next unless validity # skip below if invalid input is received and try agin
+
+        availability = check_input_availability(input, points_marked) # ensure input is not already marked
+
+        correct_input = true if validity && availability
+      end
+
+      input
+    end
 
     def check_input_validity(input)
       continue = false
@@ -195,7 +201,7 @@ module TicTacToe
     end
 
     def announce_round_winner(winning_points,round)
-      puts "*** Final board ***"
+      puts "\n*** Final board ***"
       board.display_grid(nil, winning_points)
       puts "*** Final board ***"
 
@@ -206,14 +212,14 @@ module TicTacToe
         puts "Round #{round} goes to #{round_winner.name}!".colorize(:green)
       end
 
-      print "Press any key to continue..."
+      print "\nPress any key to continue...\n"
       gets
     end
 
     def display_scoreboard(rounds)
       draw_score = (rounds - (player_x.score + player_o.score))
 
-      puts "SCOREBOARD".center(45).underline
+      puts "SCOREBOARD".ljust(45).underline
       [player_x, player_o].each do |player|
         print player.name.to_s.ljust(15)
         puts "| #{player.score}"
@@ -229,7 +235,7 @@ module TicTacToe
         puts "Level! :-(".colorize(:red)
       end
 
-      print "Press any key to continue..."
+      print "\nPress any key to continue...\n"
       gets
     end
   end
