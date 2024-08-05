@@ -46,7 +46,7 @@ module TicTacToe
 
             board.combined_grids(marked_point) # display playing board grid with recent marked point
           end
-          break if self.round_winner # no need to continue if winner has been found
+          break if round_winner # no need to continue if winner has been found
         end
         announce_round_winner(winning_points,round+1) # announce winner of the round and tally the score
       end
