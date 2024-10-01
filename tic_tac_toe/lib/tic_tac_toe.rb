@@ -9,6 +9,7 @@ module TicTacToe
 
     def initialize
       @board = Board.new
+      @round_winner = nil
       @player_x = Player.new("Player X", "X")
       @player_o = Player.new("Player O", "O")
     end
@@ -19,10 +20,9 @@ module TicTacToe
       rounds.times do |round|
         puts "\n******************** Round #{round + 1} ********************".black.on_white
 
-        self.round_winner = nil # winner of round
-        self.board = Board.new
+        reset_round
         points_marked = [] # already marked points in grid
-        winning_points = nil # winning grid points for highlighting
+        winning_points = [] # winning grid points for highlighting
 
         board.combined_grids # display a combined playing board grid and graphic key, side-by-side
 
@@ -36,18 +36,21 @@ module TicTacToe
 
             marked_point = mark_board(player, input)
             set_check = check_if_three(player)
-            set_completed = set_check[:set_completed]
-            winning_points = set_check[:winning_points]
+            #set_completed = set_check[:set_completed]
 
-            if set_completed # has player completed 3-in-a-row
+            if set_check[:set_completed] # has player completed 3-in-a-row
               self.round_winner = player
+              winning_points = set_check[:winning_points]
+              puts "Winning points set: #{winning_points}"
               break # no need to allow other player to play
             end
 
             board.combined_grids(marked_point) # display playing board grid with recent marked point
           end
+
           break if round_winner # no need to continue if winner has been found
         end
+
         announce_round_winner(winning_points,round+1) # announce winner of the round and tally the score
       end
 
@@ -55,6 +58,11 @@ module TicTacToe
     end
 
     private
+
+    def reset_round
+      self.round_winner = nil
+      self.board = Board.new
+    end
 
     def prompt_user_input(player, points_marked)
       correct_input = false
