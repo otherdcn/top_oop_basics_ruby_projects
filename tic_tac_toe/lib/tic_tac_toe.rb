@@ -18,50 +18,57 @@ module TicTacToe
       puts "Best of #{rounds}" unless rounds == 1
 
       rounds.times do |round|
-        puts "\n******************** Round #{round + 1} ********************".black.on_white
-
-        reset_round
-        points_marked = [] # already marked points in grid
-        winning_points = [] # winning grid points for highlighting
-
-        board.combined_grids # display a combined playing board grid and graphic key, side-by-side
-
-        (board.grid.flatten.size / 2.0).ceil.times do |turn|
-          puts "\nTurn #{turn + 1}"
-
-          [player_x, player_o].each do |player|
-            break if points_marked.size == 9
-
-            input = prompt_user_input(player, points_marked)
-
-            marked_point = mark_board(player, input)
-            set_check = check_if_three(player)
-            #set_completed = set_check[:set_completed]
-
-            if set_check[:set_completed] # has player completed 3-in-a-row
-              self.round_winner = player
-              winning_points = set_check[:winning_points]
-              puts "Winning points set: #{winning_points}"
-              break # no need to allow other player to play
-            end
-
-            board.combined_grids(marked_point) # display playing board grid with recent marked point
-          end
-
-          break if round_winner # no need to continue if winner has been found
-        end
-
-        announce_round_winner(winning_points,round+1) # announce winner of the round and tally the score
+        play_round(round)
       end
 
       display_scoreboard(rounds)
     end
 
-    private
-
     def reset_round
       self.round_winner = nil
       self.board = Board.new
+    end
+
+    def play_round(round)
+      puts "\n******************** Round #{round + 1} ********************".black.on_white
+      reset_round
+
+      winning_points = [] # winning grid points for highlighting
+      points_marked = [] # already marked points in grid
+
+      board.combined_grids # display a combined playing board grid and graphic key, side-by-side
+
+      (board.grid.flatten.size / 2.0).ceil.times do |turn|
+        winning_points = fill_board_per_turn(turn, points_marked)
+        break if round_winner # no need to continue if winner has been found
+      end
+
+      announce_round_winner(winning_points,round+1) # announce winner of the round and tally the score
+    end
+
+    def fill_board_per_turn(turn, points_marked)
+      puts "\nTurn #{turn + 1}"
+      winning_points = []
+
+      [player_x, player_o].each do |player|
+        break if points_marked.size == 9
+
+        input = prompt_user_input(player, points_marked)
+
+        marked_point = mark_board(player, input)
+        set_check = check_if_three(player)
+        #set_completed = set_check[:set_completed]
+
+        if set_check[:set_completed] # has player completed 3-in-a-row
+          self.round_winner = player
+          winning_points = set_check[:winning_points]
+          break # no need to allow other player to play
+        end
+
+        board.combined_grids(marked_point) # display playing board grid with recent marked point
+      end
+
+      winning_points
     end
 
     def prompt_user_input(player, points_marked)
