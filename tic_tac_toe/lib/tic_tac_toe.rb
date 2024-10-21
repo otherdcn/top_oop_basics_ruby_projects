@@ -18,20 +18,20 @@ module TicTacToe
       puts "Best of #{rounds}" unless rounds == 1
 
       rounds.times do |round|
-        play_round(round)
+        complete_round(round)
       end
 
       display_scoreboard(rounds)
     end
 
-    def reset_round
+    def reset_round_state
       self.round_winner = nil
       self.board = Board.new
     end
 
-    def play_round(round)
+    def complete_round(round)
       puts "\n******************** Round #{round + 1} ********************".black.on_white
-      reset_round
+      reset_round_state
 
       winning_points = [] # winning grid points for highlighting
       points_marked = [] # already marked points in grid
@@ -53,11 +53,11 @@ module TicTacToe
       [player_x, player_o].each do |player|
         break if points_marked.size == 9
 
-        input = prompt_user_input(player, points_marked)
+        point = prompt_user_input(player, points_marked)
+        points_marked << point
 
-        marked_point = mark_board(player, input)
+        marked_point = mark_board(player, point)
         set_check = check_if_three(player)
-        #set_completed = set_check[:set_completed]
 
         if set_check[:set_completed] # has player completed 3-in-a-row
           self.round_winner = player
@@ -88,66 +88,38 @@ module TicTacToe
       input
     end
 
-    def check_input_validity(input)
-      continue = false
+    private
 
+    def check_input_validity(input)
       if input.between?("a", "i")
-        continue = true
+        true
       else
         puts "Input not between A-I/a-i. Try again"
-        continue = false
+        false
       end
-
-      continue
     end
 
     def check_input_availability(input, points_marked)
-      continue = false
-
       if points_marked.include?(input)
         puts "Point arleady marked. Try again!"
-        continue = false
+        false
       else
-        points_marked << input
-        continue = true
+        true
       end
-
-      continue
     end
 
     def mark_board(player, position)
       point = nil # grid point to be marked on board; for highlighting
 
-      case position
-      when "A", "a"
-        board.grid[0][0] = player.board_mark
-        point = [0, 0]
-      when "B", "b"
-        board.grid[0][1] = player.board_mark
-        point = [0, 1]
-      when "C", "c"
-        board.grid[0][2] = player.board_mark
-        point = [0, 2]
-      when "D", "d"
-        board.grid[1][0] = player.board_mark
-        point = [1, 0]
-      when "E", "e"
-        board.grid[1][1] = player.board_mark
-        point = [1, 1]
-      when "F", "f"
-        board.grid[1][2] = player.board_mark
-        point = [1, 2]
-      when "G", "g"
-        board.grid[2][0] = player.board_mark
-        point = [2, 0]
-      when "H", "h"
-        board.grid[2][1] = player.board_mark
-        point = [2, 1]
-      when "I", "i"
-        board.grid[2][2] = player.board_mark
-        point = [2, 2]
-      else
-        puts "Error: unkown point entered!!!"
+      board.key.each_with_index do |row, row_idx|
+        row.each_with_index do |col, col_idx|
+          next unless col == position.upcase
+          point = [row_idx, col_idx]
+          board.grid[row_idx][col_idx] = player.board_mark
+          break if point
+        end
+
+        break if point
       end
 
       point
@@ -217,13 +189,15 @@ module TicTacToe
     def announce_round_winner(winning_points,round)
       puts "\n*** Final board ***"
       board.combined_grids(nil, winning_points)
-      puts "*** Final board ***"
+      puts "\n*** Final board ***"
+
+      print "\nRound #{round}: "
 
       if round_winner.nil?
         puts "DRAW!".colorize(:yellow)
       else
         round_winner.score += 1
-        puts "Round #{round} goes to #{round_winner.name}!".colorize(:green)
+        puts "#{round_winner.name} wins!".colorize(:green)
       end
 
       print "\nPress any key to continue...\n"
@@ -252,5 +226,7 @@ module TicTacToe
       print "\nPress any key to continue...\n"
       gets
     end
+
+    private :announce_round_winner, :display_scoreboard
   end
 end
