@@ -56,7 +56,7 @@ module TicTacToe
         coord_id = prompt_user_input(player, coord_ids_marked)
         coord_ids_marked << coord_id
 
-        marked_point = mark_board(player, coord_id)
+        marked_coord = board.mark(player.board_mark, coord_id)
         set_check = check_if_three(player)
 
         if set_check[:set_completed] # has player completed 3-in-a-row
@@ -65,7 +65,7 @@ module TicTacToe
           break # no need to allow other player to play
         end
 
-        board.combined_grids(marked_point) # display playing board grid with recent marked point
+        board.combined_grids(marked_coord) # display playing board grid with recent marked point
       end
 
       winning_coords
@@ -76,6 +76,18 @@ module TicTacToe
         print "#{player.name} please enter the letter that matches the point you wish to mark: "
         input = gets.chomp.strip.downcase
         return input if input_valid?(input) && input_available?(input, coord_ids_marked)
+      end
+    end
+
+    def check_if_three(player)
+      if row_check(player.board_mark)[:set_completed]
+        row_check(player.board_mark)
+      elsif column_check(player.board_mark)[:set_completed]
+        column_check(player.board_mark)
+      elsif diagonal_check(player.board_mark)[:set_completed]
+        diagonal_check(player.board_mark)
+      else
+        { set_completed: false, winning_coords: [] }
       end
     end
 
@@ -96,35 +108,6 @@ module TicTacToe
         false
       else
         true
-      end
-    end
-
-    def mark_board(player, position)
-      point = nil # grid point to be marked on board; for highlighting
-
-      board.key.each_with_index do |row, row_idx|
-        row.each_with_index do |col, col_idx|
-          next unless col == position.upcase
-          point = [row_idx, col_idx]
-          board.grid[row_idx][col_idx] = player.board_mark
-          break if point
-        end
-
-        break if point
-      end
-
-      point
-    end
-
-    def check_if_three(player)
-      if row_check(player.board_mark)[:set_completed]
-        row_check(player.board_mark)
-      elsif column_check(player.board_mark)[:set_completed]
-        column_check(player.board_mark)
-      elsif diagonal_check(player.board_mark)[:set_completed]
-        diagonal_check(player.board_mark)
-      else
-        { set_completed: false, winning_coords: [] }
       end
     end
 
@@ -221,3 +204,4 @@ module TicTacToe
     private :announce_round_winner, :display_scoreboard
   end
 end
+

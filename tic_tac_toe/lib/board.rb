@@ -1,7 +1,7 @@
 require "colorize"
 
 class Board
-  attr_reader :grid, :key
+  attr_accessor :grid, :key
 
   def initialize
     @grid = Array.new(3) { Array.new(3, ".") }
@@ -60,4 +60,22 @@ class Board
       end
     end
   end
+
+  def mark(player_board_mark, coord_id)
+    coord = nil # grid point to be marked on board; for highlighting
+
+    key.each_with_index do |row, row_idx|
+      row.each_with_index do |col, col_idx|
+        next unless col == coord_id.upcase
+        coord = [row_idx, col_idx]
+        @grid[row_idx][col_idx] = player_board_mark
+        break if coord
+      end
+
+      break if coord
+    end
+
+    coord
+  end
 end
+
