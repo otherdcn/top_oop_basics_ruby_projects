@@ -78,7 +78,7 @@ describe TicTacToe::Game do
   describe "#prompt_user_input" do
     subject(:game_player_input) { described_class.new }
     let(:player) { game_player_input.player_x }
-    let(:points_marked) { ["d", "h", "b"] }
+    let(:coord_ids_marked) { ["d", "h", "b"] }
 
     describe "invalid input attempts" do
       context "when first input attempt is valid" do
@@ -90,7 +90,7 @@ describe TicTacToe::Game do
 
         it "completes loop and displays prompt message once" do
           expect(game_player_input).to receive(:print).once
-          game_player_input.prompt_user_input(player, points_marked)
+          game_player_input.prompt_user_input(player, coord_ids_marked)
         end
       end
 
@@ -105,7 +105,7 @@ describe TicTacToe::Game do
 
         it 'completes loop and displays prompt message twice' do
           expect(game_player_input).to receive(:print).twice
-          game_player_input.prompt_user_input(player, points_marked)
+          game_player_input.prompt_user_input(player, coord_ids_marked)
         end
       end
 
@@ -127,7 +127,7 @@ describe TicTacToe::Game do
 
         it 'completes loop and displays prompt message five times' do
           expect(game_player_input).to receive(:print).exactly(5).times
-          game_player_input.prompt_user_input(player, points_marked)
+          game_player_input.prompt_user_input(player, coord_ids_marked)
         end
       end
     end
@@ -142,13 +142,13 @@ describe TicTacToe::Game do
 
         it "completes loop and displays prompt message once" do
           expect(game_player_input).to receive(:print).once
-          game_player_input.prompt_user_input(player, points_marked)
+          game_player_input.prompt_user_input(player, coord_ids_marked)
         end
       end
 
       context "when first input attempt is unavailable, then an available second input" do
         before do
-          unavailable_input = points_marked[0]
+          unavailable_input = coord_ids_marked[0]
           available_input = "a"
           allow(game_player_input).to receive(:gets).and_return(unavailable_input, available_input)
           allow(game_player_input).to receive(:print)
@@ -157,15 +157,15 @@ describe TicTacToe::Game do
 
         it 'completes loop and displays prompt message twice' do
           expect(game_player_input).to receive(:print).twice
-          game_player_input.prompt_user_input(player, points_marked)
+          game_player_input.prompt_user_input(player, coord_ids_marked)
         end
       end
 
       context "when first 3 input attempts are unavailable, then an available 4th input" do
         before do
-          unavailable_input_1 = points_marked[0]
-          unavailable_input_2 = points_marked[1]
-          unavailable_input_3 = points_marked[2]
+          unavailable_input_1 = coord_ids_marked[0]
+          unavailable_input_2 = coord_ids_marked[1]
+          unavailable_input_3 = coord_ids_marked[2]
           available_input = "a"
           allow(game_player_input).to receive(:gets).and_return(unavailable_input_1,
                                                                 unavailable_input_2,
@@ -177,9 +177,65 @@ describe TicTacToe::Game do
 
         it 'completes loop and displays prompt message four times' do
           expect(game_player_input).to receive(:print).exactly(4).times
-          game_player_input.prompt_user_input(player, points_marked)
+          game_player_input.prompt_user_input(player, coord_ids_marked)
         end
       end
+    end
+  end
+
+  describe "#fill_board_per_turn" do
+    subject(:game_fill_board) { described_class.new }
+    let(:board_display) { game_fill_board.board }
+    let(:coord_ids_marked) { ["d", "h", "b"] }
+    let(:coord_point_marked) { [0,0] }
+
+    before do
+      allow(game_fill_board).to receive(:prompt_user_input).and_return("a")
+      allow(game_fill_board).to receive(:mark_board).and_return(coord_point_marked)
+      allow(board_display).to receive(:combined_grids)
+    end
+
+    context "when winner is found during current turn" do
+      before do
+        allow(game_fill_board).to receive(:check_if_three).and_return({
+          set_completed: true,
+          winning_coords: [[0,0], [0,1], [0,2]]
+        })
+      end
+
+      it "round_winner is set to current player" do
+        game_fill_board.fill_board_per_turn(coord_ids_marked)
+        expect(game_fill_board.round_winner).to_not be_nil
+      end
+
+      it "returns an array of winning points" do
+        winning_coords = game_fill_board.fill_board_per_turn(coord_ids_marked)
+        expect(winning_coords).to eq([[0,0], [0,1], [0,2]])
+      end
+    end
+
+    context "when no winner is found during current turn" do
+      before do
+        allow(game_fill_board).to receive(:check_if_three).and_return({
+          set_completed: false,
+          winning_coords: nil
+        })
+      end
+
+      it "round_winner remains nil" do
+        game_fill_board.fill_board_per_turn(coord_ids_marked)
+        expect(game_fill_board.round_winner).to be_nil
+      end
+
+      it "returns an empty array" do
+        winning_coords = game_fill_board.fill_board_per_turn(coord_ids_marked)
+        expect(winning_coords).to eq([])
+      end
+    end
+
+    it "send combined_grids to board" do
+      expect(board_display).to receive(:combined_grids).with(coord_point_marked)
+      game_fill_board.fill_board_per_turn(coord_ids_marked)
     end
   end
 end

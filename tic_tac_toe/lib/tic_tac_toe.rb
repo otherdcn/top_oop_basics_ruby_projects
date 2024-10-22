@@ -33,49 +33,49 @@ module TicTacToe
       puts "\n******************** Round #{round + 1} ********************".black.on_white
       reset_round_state
 
-      winning_points = [] # winning grid points for highlighting
-      points_marked = [] # already marked points in grid
+      winning_coords = [] # winning grid points for highlighting
+      coord_ids_marked = [] # already marked points in grid
 
       board.combined_grids # display a combined playing board grid and graphic key, side-by-side
 
       (board.grid.flatten.size / 2.0).ceil.times do |turn|
-        winning_points = fill_board_per_turn(turn, points_marked)
+        puts "\nTurn #{turn + 1}"
+        winning_coords = fill_board_per_turn(coord_ids_marked)
         break if round_winner # no need to continue if winner has been found
       end
 
-      announce_round_winner(winning_points,round+1) # announce winner of the round and tally the score
+      announce_round_winner(winning_coords,round+1) # announce winner of the round and tally the score
     end
 
-    def fill_board_per_turn(turn, points_marked)
-      puts "\nTurn #{turn + 1}"
-      winning_points = []
+    def fill_board_per_turn(coord_ids_marked)
+      winning_coords = []
 
       [player_x, player_o].each do |player|
-        break if points_marked.size == 9
+        break if coord_ids_marked.size == 9
 
-        point = prompt_user_input(player, points_marked)
-        points_marked << point
+        coord_id = prompt_user_input(player, coord_ids_marked)
+        coord_ids_marked << coord_id
 
-        marked_point = mark_board(player, point)
+        marked_point = mark_board(player, coord_id)
         set_check = check_if_three(player)
 
         if set_check[:set_completed] # has player completed 3-in-a-row
           self.round_winner = player
-          winning_points = set_check[:winning_points]
+          winning_coords = set_check[:winning_coords]
           break # no need to allow other player to play
         end
 
         board.combined_grids(marked_point) # display playing board grid with recent marked point
       end
 
-      winning_points
+      winning_coords
     end
 
-    def prompt_user_input(player, points_marked)
+    def prompt_user_input(player, coord_ids_marked)
       loop do
         print "#{player.name} please enter the letter that matches the point you wish to mark: "
         input = gets.chomp.strip.downcase
-        return input if input_valid?(input) && input_available?(input, points_marked)
+        return input if input_valid?(input) && input_available?(input, coord_ids_marked)
       end
     end
 
@@ -90,8 +90,8 @@ module TicTacToe
       end
     end
 
-    def input_available?(input, points_marked)
-      if points_marked.include?(input)
+    def input_available?(input, coord_ids_marked)
+      if coord_ids_marked.include?(input)
         puts "Point arleady marked. Try again!"
         false
       else
@@ -124,28 +124,28 @@ module TicTacToe
       elsif diagonal_check(player.board_mark)[:set_completed]
         diagonal_check(player.board_mark)
       else
-        { set_completed: false, winning_points: [] }
+        { set_completed: false, winning_coords: [] }
       end
     end
 
     def row_check(board_mark)
       set_completed = false
-      winning_points = 0
+      winning_coords = 0
 
       board.grid.each_with_index do |row, row_idx|
         if row[0] == board_mark && row[1] == board_mark && row[2] == board_mark
           set_completed = true
-          winning_points = [[row_idx, 0], [row_idx, 1], [row_idx, 2]]
+          winning_coords = [[row_idx, 0], [row_idx, 1], [row_idx, 2]]
         end
       end
 
-      { set_completed: set_completed, winning_points: winning_points }
+      { set_completed: set_completed, winning_coords: winning_coords }
     end
 
     def column_check(board_mark)
       grid_flatten = board.grid.flatten # flatten grid to ease the checking of one columnar points at once
       set_completed = false
-      winning_points = 0
+      winning_coords = 0
 
       for idx in 0..2
         unless grid_flatten[idx] == board_mark && grid_flatten[idx + 3] == board_mark && grid_flatten[idx + 6] == board_mark
@@ -153,33 +153,33 @@ module TicTacToe
         end
 
         set_completed = true
-        winning_points = [[0, 0], [1, 0], [2, 0]] if idx.zero?
-        winning_points = [[0, 1], [1, 1], [2, 1]] if idx == 1
-        winning_points = [[0, 2], [1, 2], [2, 2]] if idx == 2
+        winning_coords = [[0, 0], [1, 0], [2, 0]] if idx.zero?
+        winning_coords = [[0, 1], [1, 1], [2, 1]] if idx == 1
+        winning_coords = [[0, 2], [1, 2], [2, 2]] if idx == 2
       end
 
-      { set_completed: set_completed, winning_points: winning_points }
+      { set_completed: set_completed, winning_coords: winning_coords }
     end
 
     def diagonal_check(board_mark)
       grid_flatten = board.grid.flatten # flatten grid to ease the checking of one diagonal points at once
       set_completed = false
-      winning_points = 0
+      winning_coords = 0
 
       if grid_flatten[0] == board_mark && grid_flatten[4] == board_mark && grid_flatten[8] == board_mark
         set_completed = true
-        winning_points = [[0, 0], [1, 1], [2, 2]]
+        winning_coords = [[0, 0], [1, 1], [2, 2]]
       elsif grid_flatten[2] == board_mark && grid_flatten[4] == board_mark && grid_flatten[6] == board_mark
         set_completed = true
-        winning_points = [[0, 2], [1, 1], [2, 0]]
+        winning_coords = [[0, 2], [1, 1], [2, 0]]
       end
 
-      { set_completed: set_completed, winning_points: winning_points }
+      { set_completed: set_completed, winning_coords: winning_coords }
     end
 
-    def announce_round_winner(winning_points,round)
+    def announce_round_winner(winning_coords,round)
       puts "\n*** Final board ***"
-      board.combined_grids(nil, winning_points)
+      board.combined_grids(nil, winning_coords)
       puts "\n*** Final board ***"
 
       print "\nRound #{round}: "
@@ -211,7 +211,7 @@ module TicTacToe
       elsif player_x.score < player_o.score
         puts "#{player_o.name} wins Best of #{rounds}!".colorize(:green)
       else
-        puts "Level! :-(".colorize(:red)
+        puts "Level! :-l".colorize(:red)
       end
 
       print "\nPress any key to continue...\n"
