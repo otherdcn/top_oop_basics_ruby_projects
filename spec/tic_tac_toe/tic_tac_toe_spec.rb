@@ -74,4 +74,112 @@ describe TicTacToe::Game do
       game_complete_round.complete_round(1)
     end
   end
+
+  describe "#prompt_user_input" do
+    subject(:game_player_input) { described_class.new }
+    let(:player) { game_player_input.player_x }
+    let(:points_marked) { ["d", "h", "b"] }
+
+    describe "invalid input attempts" do
+      context "when first input attempt is valid" do
+        before do
+          valid_input = "a"
+          allow(game_player_input).to receive(:gets).and_return(valid_input)
+          allow(game_player_input).to receive(:print)
+        end
+
+        it "completes loop and displays prompt message once" do
+          expect(game_player_input).to receive(:print).once
+          game_player_input.prompt_user_input(player, points_marked)
+        end
+      end
+
+      context "when first input attempt is invalid, then a valid second input" do
+        before do
+          invalid_input = "p"
+          valid_input = "a"
+          allow(game_player_input).to receive(:gets).and_return(invalid_input, valid_input)
+          allow(game_player_input).to receive(:print)
+          allow(game_player_input).to receive(:puts).with("Input not between A-I/a-i. Try again")
+        end
+
+        it 'completes loop and displays prompt message twice' do
+          expect(game_player_input).to receive(:print).twice
+          game_player_input.prompt_user_input(player, points_marked)
+        end
+      end
+
+      context "when first 4 input attempts are invlaid, then a valid 5th input" do
+        before do
+          invalid_input_1 = "r"
+          invalid_input_2 = "u"
+          invalid_input_3 = "m"
+          invalid_input_4 = "p"
+          valid_input = "a"
+          allow(game_player_input).to receive(:gets).and_return(invalid_input_1,
+                                                                invalid_input_2,
+                                                                invalid_input_3,
+                                                                invalid_input_4,
+                                                                valid_input)
+          allow(game_player_input).to receive(:print)
+          allow(game_player_input).to receive(:puts).with("Input not between A-I/a-i. Try again")
+        end
+
+        it 'completes loop and displays prompt message five times' do
+          expect(game_player_input).to receive(:print).exactly(5).times
+          game_player_input.prompt_user_input(player, points_marked)
+        end
+      end
+    end
+
+    describe "unavailable input attempts" do
+      context "when first input attempt is unavailable" do
+         before do
+          available_input = "a"
+          allow(game_player_input).to receive(:gets).and_return(available_input)
+          allow(game_player_input).to receive(:print)
+        end
+
+        it "completes loop and displays prompt message once" do
+          expect(game_player_input).to receive(:print).once
+          game_player_input.prompt_user_input(player, points_marked)
+        end
+      end
+
+      context "when first input attempt is unavailable, then an available second input" do
+        before do
+          unavailable_input = points_marked[0]
+          available_input = "a"
+          allow(game_player_input).to receive(:gets).and_return(unavailable_input, available_input)
+          allow(game_player_input).to receive(:print)
+          allow(game_player_input).to receive(:puts).with("Point arleady marked. Try again!")
+        end
+
+        it 'completes loop and displays prompt message twice' do
+          expect(game_player_input).to receive(:print).twice
+          game_player_input.prompt_user_input(player, points_marked)
+        end
+      end
+
+      context "when first 3 input attempts are unavailable, then an available 4th input" do
+        before do
+          unavailable_input_1 = points_marked[0]
+          unavailable_input_2 = points_marked[1]
+          unavailable_input_3 = points_marked[2]
+          available_input = "a"
+          allow(game_player_input).to receive(:gets).and_return(unavailable_input_1,
+                                                                unavailable_input_2,
+                                                                unavailable_input_3,
+                                                                available_input)
+          allow(game_player_input).to receive(:print)
+          allow(game_player_input).to receive(:puts).with("Point arleady marked. Try again!")
+        end
+
+        it 'completes loop and displays prompt message four times' do
+          expect(game_player_input).to receive(:print).exactly(4).times
+          game_player_input.prompt_user_input(player, points_marked)
+        end
+      end
+    end
+  end
 end

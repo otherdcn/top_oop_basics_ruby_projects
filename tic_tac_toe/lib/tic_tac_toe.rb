@@ -72,25 +72,16 @@ module TicTacToe
     end
 
     def prompt_user_input(player, points_marked)
-      correct_input = false
-
-      until correct_input # sanitise and validate input
+      loop do
         print "#{player.name} please enter the letter that matches the point you wish to mark: "
         input = gets.chomp.strip.downcase
-        validity = check_input_validity(input) # ensure input is valid
-        next unless validity # skip below if invalid input is received and try agin
-
-        availability = check_input_availability(input, points_marked) # ensure input is not already marked
-
-        correct_input = true if validity && availability
+        return input if input_valid?(input) && input_available?(input, points_marked)
       end
-
-      input
     end
 
     private
 
-    def check_input_validity(input)
+    def input_valid?(input)
       if input.between?("a", "i")
         true
       else
@@ -99,7 +90,7 @@ module TicTacToe
       end
     end
 
-    def check_input_availability(input, points_marked)
+    def input_available?(input, points_marked)
       if points_marked.include?(input)
         puts "Point arleady marked. Try again!"
         false
