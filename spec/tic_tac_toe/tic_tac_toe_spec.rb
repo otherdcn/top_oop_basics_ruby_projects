@@ -191,7 +191,7 @@ describe TicTacToe::Game do
 
     before do
       allow(game_fill_board).to receive(:prompt_user_input).and_return("a")
-      allow(game_fill_board).to receive(:mark_board).and_return(coord_point_marked)
+      allow(board_display).to receive(:mark).and_return(coord_point_marked)
       allow(board_display).to receive(:combined_grids)
     end
 
@@ -238,4 +238,49 @@ describe TicTacToe::Game do
       game_fill_board.fill_board_per_turn(coord_ids_marked)
     end
   end
+
+  describe "#check_if_three" do
+    subject(:game_set_check)      { described_class.new }
+    let(:complete_row_set)        { { set_completed: true, winning_coords: [[1,0], [1,1], [1,2]] } }
+    let(:complete_column_set)     { { set_completed: true, winning_coords: [[0,1], [1,1], [2,1]] } }
+    let(:complete_diagonal_set)   { { set_completed: true, winning_coords: [[2,0], [1,1], [0,1]] } }
+    let(:incomplete_set)          { { set_completed: false, winning_coords: [] } }
+    let(:player) { game_set_check.player_x }
+
+
+    context "when there is a complete set" do
+      before do
+        allow(game_set_check).to receive(:column_check).and_return(complete_column_set)
+        #allow(game_set_check).to receive(:diagonal_check).and_return(incomplete_set)
+      end
+
+      it "returns a hash with set_completed set to true" do
+        game_set_check.check_if_three(player) => set_completed: set_completed
+        expect(set_completed).to be true
+      end
+
+      it "returns a hash with an array of a complete co-ordinate set" do
+        game_set_check.check_if_three(player) => winning_coords: winning_coords
+        expect(winning_coords).to_not be_empty
+      end
+    end
+
+    context "when there is no complete set" do
+      before do
+        #allow(game_set_check).to receive(:column_check).and_return(complete_column_set)
+        allow(game_set_check).to receive(:diagonal_check).and_return(incomplete_set)
+      end
+
+      it "returns a hash with set_completed set to false" do
+        game_set_check.check_if_three(player) => set_completed: set_completed
+        expect(set_completed).to be false
+      end
+
+      it "returns a hash with an empty co-ordinates array" do
+        game_set_check.check_if_three(player) => winning_coords: winning_coords
+        expect(winning_coords).to be_empty
+      end
+    end
+  end
 end
+
