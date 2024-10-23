@@ -80,12 +80,12 @@ module TicTacToe
     end
 
     def check_if_three(player)
-      if row_check(player.board_mark)[:set_completed]
-        row_check(player.board_mark)
-      elsif column_check(player.board_mark)[:set_completed]
-        column_check(player.board_mark)
-      elsif diagonal_check(player.board_mark)[:set_completed]
-        diagonal_check(player.board_mark)
+      if board.row_check(player.board_mark)[:set_completed]
+        board.row_check(player.board_mark)
+      elsif board.column_check(player.board_mark)[:set_completed]
+        board.column_check(player.board_mark)
+      elsif board.diagonal_check(player.board_mark)[:set_completed]
+        board.diagonal_check(player.board_mark)
       else
         { set_completed: false, winning_coords: [] }
       end
@@ -109,55 +109,6 @@ module TicTacToe
       else
         true
       end
-    end
-
-    def row_check(board_mark)
-      set_completed = false
-      winning_coords = 0
-
-      board.grid.each_with_index do |row, row_idx|
-        if row[0] == board_mark && row[1] == board_mark && row[2] == board_mark
-          set_completed = true
-          winning_coords = [[row_idx, 0], [row_idx, 1], [row_idx, 2]]
-        end
-      end
-
-      { set_completed: set_completed, winning_coords: winning_coords }
-    end
-
-    def column_check(board_mark)
-      grid_flatten = board.grid.flatten # flatten grid to ease the checking of one columnar points at once
-      set_completed = false
-      winning_coords = 0
-
-      for idx in 0..2
-        unless grid_flatten[idx] == board_mark && grid_flatten[idx + 3] == board_mark && grid_flatten[idx + 6] == board_mark
-          next
-        end
-
-        set_completed = true
-        winning_coords = [[0, 0], [1, 0], [2, 0]] if idx.zero?
-        winning_coords = [[0, 1], [1, 1], [2, 1]] if idx == 1
-        winning_coords = [[0, 2], [1, 2], [2, 2]] if idx == 2
-      end
-
-      { set_completed: set_completed, winning_coords: winning_coords }
-    end
-
-    def diagonal_check(board_mark)
-      grid_flatten = board.grid.flatten # flatten grid to ease the checking of one diagonal points at once
-      set_completed = false
-      winning_coords = 0
-
-      if grid_flatten[0] == board_mark && grid_flatten[4] == board_mark && grid_flatten[8] == board_mark
-        set_completed = true
-        winning_coords = [[0, 0], [1, 1], [2, 2]]
-      elsif grid_flatten[2] == board_mark && grid_flatten[4] == board_mark && grid_flatten[6] == board_mark
-        set_completed = true
-        winning_coords = [[0, 2], [1, 1], [2, 0]]
-      end
-
-      { set_completed: set_completed, winning_coords: winning_coords }
     end
 
     def announce_round_winner(winning_coords,round)

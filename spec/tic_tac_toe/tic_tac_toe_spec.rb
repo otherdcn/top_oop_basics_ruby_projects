@@ -241,17 +241,52 @@ describe TicTacToe::Game do
 
   describe "#check_if_three" do
     subject(:game_set_check)      { described_class.new }
+    let(:board_check)             { game_set_check.board }
+
     let(:complete_row_set)        { { set_completed: true, winning_coords: [[1,0], [1,1], [1,2]] } }
     let(:complete_column_set)     { { set_completed: true, winning_coords: [[0,1], [1,1], [2,1]] } }
     let(:complete_diagonal_set)   { { set_completed: true, winning_coords: [[2,0], [1,1], [0,1]] } }
     let(:incomplete_set)          { { set_completed: false, winning_coords: [] } }
     let(:player) { game_set_check.player_x }
 
+    context "when sending outgoing messages" do
+      context "board_check" do
+        before do
+          allow(board_check).to receive(:row_check).and_return(complete_row_set)
+        end
+
+        it do
+          expect(board_check).to receive(:row_check).twice
+          game_set_check.check_if_three(player)
+        end
+      end
+
+      context "board_check" do
+        before do
+          allow(board_check).to receive(:column_check).and_return(complete_column_set)
+        end
+
+        it do
+          expect(board_check).to receive(:column_check).twice
+          game_set_check.check_if_three(player)
+        end
+      end
+
+      context "board_check" do
+        before do
+          allow(board_check).to receive(:diagonal_check).and_return(complete_diagonal_set)
+        end
+
+        it do
+          expect(board_check).to receive(:diagonal_check).twice
+          game_set_check.check_if_three(player)
+        end
+      end
+    end
 
     context "when there is a complete set" do
       before do
-        allow(game_set_check).to receive(:column_check).and_return(complete_column_set)
-        #allow(game_set_check).to receive(:diagonal_check).and_return(incomplete_set)
+        allow(board_check).to receive(:column_check).and_return(complete_column_set)
       end
 
       it "returns a hash with set_completed set to true" do
@@ -267,8 +302,7 @@ describe TicTacToe::Game do
 
     context "when there is no complete set" do
       before do
-        #allow(game_set_check).to receive(:column_check).and_return(complete_column_set)
-        allow(game_set_check).to receive(:diagonal_check).and_return(incomplete_set)
+        allow(board_check).to receive(:diagonal_check).and_return(incomplete_set)
       end
 
       it "returns a hash with set_completed set to false" do

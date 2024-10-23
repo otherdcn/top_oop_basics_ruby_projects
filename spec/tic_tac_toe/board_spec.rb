@@ -35,7 +35,7 @@ describe Board do
     it "returns the multi-dimensioanl array co-ordinates" do
       return_coord = board_obj.mark(player_board_mark, coord_id)
 
-      expect(return_coord).to eq([0, 0])
+      expect(return_coord).to eq(coord)
     end
   end
 end
