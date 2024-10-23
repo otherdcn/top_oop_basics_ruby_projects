@@ -38,5 +38,71 @@ describe Board do
       expect(return_coord).to eq(coord)
     end
   end
+
+  describe "#row_check" do
+    subject(:board_check) { described_class.new }
+
+    context "when no row contains three sequential marks" do
+      it do
+        row_set = board_check.row_check("x")
+        expect(row_set[:set_completed]).to eq false
+      end
+    end
+
+    context "when one row contains three sequential marks(Xs or Os)" do
+      before do
+        board_check.grid = [["x", "x", "x"], [".", ".", "."], [".", ".", "."]]
+      end
+
+      it do
+        row_set = board_check.row_check("x")
+        expect(row_set[:set_completed]).to eq true
+      end
+    end
+  end
+
+  describe "#column_check" do
+    subject(:board_check) { described_class.new }
+
+    context "when no column contains three sequential marks" do
+      it do
+        column_set = board_check.column_check("x")
+        expect(column_set[:set_completed]).to eq false
+      end
+    end
+
+    context "when one column contains three sequential marks(Xs or Os)" do
+      before do
+        board_check.grid = [["x", ".", "."], ["x", ".", "."], ["x", ".", "."]]
+      end
+
+      it do
+        column_set = board_check.column_check("x")
+        expect(column_set[:set_completed]).to eq true
+      end
+    end
+  end
+
+  describe "#diagonal_check" do
+    subject(:board_check) { described_class.new }
+
+    context "when no diagonal contains three sequential marks" do
+      it do
+        diagonal_set = board_check.diagonal_check("x")
+        expect(diagonal_set[:set_completed]).to eq false
+      end
+    end
+
+    context "when one diagonal contains three sequential marks(Xs or Os)" do
+      before do
+        board_check.grid = [["x", ".", "."], [".", "x", "."], [".", ".", "x"]]
+      end
+
+      it do
+        diagonal_set = board_check.diagonal_check("x")
+        expect(diagonal_set[:set_completed]).to eq true
+      end
+    end
+  end
 end
 
